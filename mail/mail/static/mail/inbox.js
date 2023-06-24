@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 
   // Use buttons to toggle between views
-  document.querySelector('#inbox').addEventListener('click', () => load_mailbox('in box'));
+  document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
@@ -32,6 +32,22 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+  fetch(`/emails/${mailbox}`)
+      .then(response => response.json())
+      .then(allemails => {
+        allemails.forEach(email => {
+          const element = document.createElement('div');
+          element.className = "list-group-item";
+          element.innerHTML = `
+        <b style="display: inline-block;">From: ${email.sender} &emsp;</b>
+        <p style="display: inline-block;">${email.subject}</p>
+        <p style="text-align: right; color:#5f6368; float: right;">${email.timestamp}</p>`;
+          element.addEventListener('click', function() {
+            console.log('This element has been clicked!');
+          });
+          document.querySelector('#emails-view').append(element);
+        });
+      });
 }
 
 function sendEmail(){
