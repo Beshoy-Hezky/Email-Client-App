@@ -12,11 +12,44 @@ document.addEventListener('DOMContentLoaded', function() {
   load_mailbox('inbox');
 });
 
+function open_email(id){
+  fetch(`/emails/${id}`)
+      .then(response => response.json())
+      .then(email => {
+        document.querySelector('#emails-view').style.display = 'none';
+        document.querySelector('#compose-view').style.display = 'none';
+        document.querySelector('#open-email').style.display = 'block';
+
+        document.querySelector('#open-email').innerHTML = `
+        <div class="vertical-space" ><b>From: </b> ${email.sender}</div>
+        <div class="vertical-space"><b>To: </b> ${email.recipients}</div>
+        <div class="vertical-space"><b>Subject: </b> ${email.subject}</div>
+        <div class="vertical-space"><b>Timestamp: </b> ${email.timestamp}</div>  
+        <button class="btn btn-sm btn-outline-primary" id="inbox">Reply</button>
+        <hr>
+        ${email.body}
+        `
+
+        // Change to read
+        if(!email.read){
+          fetch(`/emails/${email.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              read: true
+            })
+          })
+        }
+
+      });
+}
+
+
 function compose_email() {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
+  document.querySelector('#open-email').style.display = 'none';
 
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
@@ -29,6 +62,7 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#open-email').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
@@ -40,7 +74,7 @@ function load_mailbox(mailbox) {
 
           // To account for read and unread (make background gray if read)
           let top;
-          if (email.read === true) {
+          if (email.read) {
             top = `<div class="list-group-item" style="height: 45px; background: #9e9d9d">`;
           } else {
             top = `<div class="list-group-item" style="height: 45px;">`;
@@ -52,9 +86,10 @@ function load_mailbox(mailbox) {
               <p class="timestamp" class="inline">${email.timestamp}</p>
             </div>`;
 
-          element.addEventListener('click', function() {
-            console.log('This element has been clicked!');
-          });
+          element.addEventListener('click', function (){
+            open_email(email.id);
+          }
+          );
           document.querySelector('#emails-view').append(element);
         });
       });
