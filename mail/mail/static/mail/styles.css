@@ -12,3 +12,6 @@ textarea {
     display: inline-block;
 }
 
+.vertical-space {
+    margin-bottom: 4px;
+}
