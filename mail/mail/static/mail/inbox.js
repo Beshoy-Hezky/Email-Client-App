@@ -37,11 +37,14 @@ function load_mailbox(mailbox) {
       .then(allemails => {
         allemails.forEach(email => {
           const element = document.createElement('div');
-          element.className = "list-group-item";
           element.innerHTML = `
-        <b style="display: inline-block;">From: ${email.sender} &emsp;</b>
-        <p style="display: inline-block;">${email.subject}</p>
-        <p style="text-align: right; color:#5f6368; float: right;">${email.timestamp}</p>`;
+        <div class="list-group-item" style="height: 45px;">
+        <b class="inline">From: ${email.sender} &emsp;</b>
+        <p class="inline">${email.subject}</p>
+        <p class="timestamp" class="inline">${email.timestamp}</p>
+        </div>`;
+
+          // make grey if when read
           element.addEventListener('click', function() {
             console.log('This element has been clicked!');
           });
