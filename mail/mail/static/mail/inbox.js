@@ -12,23 +12,14 @@ document.addEventListener('DOMContentLoaded', function() {
   load_mailbox('inbox');
 });
 
-function open_email(id){
+function open_email(id, element){
   fetch(`/emails/${id}`)
       .then(response => response.json())
       .then(email => {
-        document.querySelector('#emails-view').style.display = 'none';
+        document.querySelector('#emails-view').style.display = 'block';
         document.querySelector('#compose-view').style.display = 'none';
-        document.querySelector('#open-email').style.display = 'block';
 
-        document.querySelector('#open-email').innerHTML = `
-        <div class="vertical-space" ><b>From: </b> ${email.sender}</div>
-        <div class="vertical-space"><b>To: </b> ${email.recipients}</div>
-        <div class="vertical-space"><b>Subject: </b> ${email.subject}</div>
-        <div class="vertical-space"><b>Timestamp: </b> ${email.timestamp}</div>  
-        <button class="btn btn-sm btn-outline-primary" id="inbox">Reply</button>
-        <hr>
-        ${email.body}
-        `
+
 
         // Change to read
         if(!email.read){
@@ -40,6 +31,17 @@ function open_email(id){
           })
         }
 
+
+
+        element.innerHTML = `
+        <div class="vertical-space" ><b>From: </b> ${email.sender}</div>
+        <div class="vertical-space"><b>To: </b> ${email.recipients}</div>
+        <div class="vertical-space"><b>Subject: </b> ${email.subject}</div>
+        <div class="vertical-space"><b>Timestamp: </b> ${email.timestamp}</div>  
+        <button class="btn btn-sm btn-outline-primary" id="inbox">Reply</button>
+        <hr>
+        ${email.body}
+        `
       });
 }
 
@@ -49,7 +51,6 @@ function compose_email() {
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
-  document.querySelector('#open-email').style.display = 'none';
 
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
@@ -62,7 +63,6 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
-  document.querySelector('#open-email').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
@@ -87,7 +87,7 @@ function load_mailbox(mailbox) {
             </div>`;
 
           element.addEventListener('click', function (){
-            open_email(email.id);
+             open_email(email.id, element);
           }
           );
           document.querySelector('#emails-view').append(element);
