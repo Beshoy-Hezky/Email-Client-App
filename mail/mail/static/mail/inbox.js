@@ -33,12 +33,13 @@ function open_email(email) {
     <div class="vertical-space"><b>To: </b> ${email.recipients}</div>
     <div class="vertical-space"><b>Subject: </b> ${email.subject}</div>
     <div class="vertical-space"><b>Timestamp: </b> ${email.timestamp}</div>
-    <button class="btn btn-sm btn-outline-primary" id="inbox" class="inline">Reply</button>
+    <div class="inline" id="reply_button"></div>
     <div id="archive_button" class="inline"></div>
     <hr>
     ${email.body}
   `;
 
+    // Add archive button
     const archive_button = document.createElement('div');
     if(!email.archived){
         archive_button.innerHTML=`<button class="btn btn-sm btn-outline-warning" id="archive">Archive</button>`;
@@ -56,6 +57,29 @@ function open_email(email) {
             });
     });
     document.querySelector('#archive_button').append(archive_button);
+
+
+    // Add Reply button
+    const reply_button = document.createElement('div');
+    reply_button.innerHTML=`<button class="btn btn-sm btn-outline-primary" id="inbox" class="inline">Reply</button>`;
+    reply_button.addEventListener('click', function() {
+        // To change all the HTML
+        document.querySelector('#emails-view').style.display = 'none';
+        document.querySelector('#compose-view').style.display = 'block';
+        document.querySelector('#individual-view').style.display = 'none';
+
+        // Autofill some fields
+        document.querySelector('#compose-recipients').value = `${email.sender}`;
+        //To check if "Re:" already exists
+        if (email.subject.startsWith('Re:')) {
+            document.querySelector('#compose-subject').value = email.subject;
+        } else {
+            document.querySelector('#compose-subject').value = `Re: ${email.subject}`;
+        }
+        document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote: ${email.body} `;
+    });
+    document.querySelector('#reply_button').append(reply_button);
+
 }
 
 
