@@ -12,37 +12,50 @@ document.addEventListener('DOMContentLoaded', function() {
   load_mailbox('inbox');
 });
 
-function open_email(id, element){
-  fetch(`/emails/${id}`)
-      .then(response => response.json())
-      .then(email => {
-        document.querySelector('#emails-view').style.display = 'block';
-        document.querySelector('#compose-view').style.display = 'none';
+function open_email(email) {
+    document.querySelector('#emails-view').style.display = 'none';
+    document.querySelector('#compose-view').style.display = 'none';
+    document.querySelector('#individual-view').style.display = 'block';
 
-
-
-        // Change to read
-        if(!email.read){
-          fetch(`/emails/${email.id}`, {
+    // Change to read
+    if (!email.read) {
+        void fetch(`/emails/${email.id}`, {
             method: 'PUT',
             body: JSON.stringify({
-              read: true
+                read: true
             })
-          })
-        }
+        });
+    }
 
+    //The HTML of the page
+    document.querySelector('#individual-view').innerHTML = `
+    <div class="vertical-space"><b>From: </b> ${email.sender}</div>
+    <div class="vertical-space"><b>To: </b> ${email.recipients}</div>
+    <div class="vertical-space"><b>Subject: </b> ${email.subject}</div>
+    <div class="vertical-space"><b>Timestamp: </b> ${email.timestamp}</div>
+    <button class="btn btn-sm btn-outline-primary" id="inbox" class="inline">Reply</button>
+    <div id="archive_button" class="inline"></div>
+    <hr>
+    ${email.body}
+  `;
 
+    const archive_button = document.createElement('div');
+    if(!email.archived){
+        archive_button.innerHTML=`<button class="btn btn-sm btn-outline-warning" id="archive">Archive</button>`;
+    }
+    else{
+        archive_button.innerHTML=`<button class="btn btn-sm btn-outline-danger" id="archive">Unarchive</button>`;
+    }
 
-        element.innerHTML = `
-        <div class="vertical-space" ><b>From: </b> ${email.sender}</div>
-        <div class="vertical-space"><b>To: </b> ${email.recipients}</div>
-        <div class="vertical-space"><b>Subject: </b> ${email.subject}</div>
-        <div class="vertical-space"><b>Timestamp: </b> ${email.timestamp}</div>  
-        <button class="btn btn-sm btn-outline-primary" id="inbox">Reply</button>
-        <hr>
-        ${email.body}
-        `
-      });
+    archive_button.addEventListener('click', function() {
+            void fetch(`/emails/${email.id}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    archived: !email.archived
+                })
+            });
+    });
+    document.querySelector('#archive_button').append(archive_button);
 }
 
 
@@ -51,6 +64,7 @@ function compose_email() {
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
+  document.querySelector('#individual-view').style.display = 'none';
 
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
@@ -63,6 +77,7 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#individual-view').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
@@ -87,7 +102,7 @@ function load_mailbox(mailbox) {
             </div>`;
 
           element.addEventListener('click', function (){
-             open_email(email.id, element);
+             open_email(email);
           }
           );
           document.querySelector('#emails-view').append(element);
@@ -118,3 +133,4 @@ function sendEmail(){
         load_mailbox('sent');
       });
 }
+
